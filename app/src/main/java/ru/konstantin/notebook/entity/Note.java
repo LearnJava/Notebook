@@ -9,7 +9,7 @@ public class Note implements Parcelable {
 
 //    public Note() {}
 
-    public Note(long id, String description, String note, Date noteDate) {
+    public Note(long id, String description, String note, long noteDate) {
         this.id = id;
         this.description = description;
         this.note = note;
@@ -19,12 +19,13 @@ public class Note implements Parcelable {
     private long id;
     private String description;
     private String note;
-    private Date noteDate;
+    private long noteDate;
 
     protected Note(Parcel in) {
         id = in.readLong();
         description = in.readString();
         note = in.readString();
+        noteDate = in.readLong();
     }
 
     public static final Creator<Note> CREATOR = new Creator<Note>() {
@@ -63,11 +64,11 @@ public class Note implements Parcelable {
         this.note = note;
     }
 
-    public Date getNoteDate() {
+    public long getNoteDate() {
         return noteDate;
     }
 
-    public void setNoteDate(Date noteDate) {
+    public void setNoteDate(long noteDate) {
         this.noteDate = noteDate;
     }
 
@@ -81,5 +82,6 @@ public class Note implements Parcelable {
         dest.writeLong(id);
         dest.writeString(description);
         dest.writeString(note);
+        dest.writeLong(noteDate);
     }
 }

@@ -22,10 +22,21 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
 
     @Override
     public void onNoteClicked(Note note) {
+
+        boolean isLandscape = getResources().getBoolean(R.bool.isLandscape);
 //        Toast.makeText(this, note.getNote(), Toast.LENGTH_SHORT).show();
-        Intent intent = new Intent(this, NoteDetailsActivity.class);
-        intent.putExtra(NoteDetailsActivity.ARG_NOTE, note);
-        startActivity(intent);
+
+        if (isLandscape) {
+//            Вызываем фрагмент
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .replace(R.id.notes_details_fragment, NoteDetailsFragment.newInstance(note))
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, NoteDetailsActivity.class);
+            intent.putExtra(NoteDetailsActivity.ARG_NOTE, note);
+            startActivity(intent);
+        }
     }
 
 }

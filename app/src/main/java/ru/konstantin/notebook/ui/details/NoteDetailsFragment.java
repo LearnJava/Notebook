@@ -1,15 +1,21 @@
 package ru.konstantin.notebook.ui.details;
 
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import ru.konstantin.notebook.R;
 import ru.konstantin.notebook.entity.Note;
@@ -33,6 +39,7 @@ public class NoteDetailsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_note_details, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -44,9 +51,9 @@ public class NoteDetailsFragment extends Fragment {
 
         Note note = getArguments().getParcelable(ARG_NOTE);
 
-//        noteId.setText((int) note.getId());
+        noteId.setText(String.valueOf(note.getId()));
         noteDesc.setText(note.getDescription());
         noteText.setText(note.getNote());
-//        noteDate.setText(note.getNoteDate().toString());
+        noteDate.setText(String.valueOf(LocalDateTime.ofInstant(Instant.ofEpochMilli(note.getNoteDate()), ZoneId.systemDefault())));
     }
 }

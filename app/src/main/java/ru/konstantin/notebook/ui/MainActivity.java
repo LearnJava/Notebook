@@ -1,8 +1,10 @@
-package ru.konstantin.notebook;
+package ru.konstantin.notebook.ui;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+
+import ru.konstantin.notebook.R;
 
 public class MainActivity extends AppCompatActivity {
 

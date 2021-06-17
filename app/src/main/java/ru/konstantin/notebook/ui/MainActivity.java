@@ -26,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         boolean isLandscape = getResources().getBoolean(R.bool.isLandscape);
 //        Toast.makeText(this, note.getNote(), Toast.LENGTH_SHORT).show();
 
+        //Разбираюсь с RecyclerView и GridLayout, чтобы реализовать прокручивающиеся заметки.
+
         if (isLandscape) {
 //            Вызываем фрагмент
             getSupportFragmentManager()

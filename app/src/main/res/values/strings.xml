@@ -1,6 +1,24 @@
 <resources>
     <string name="app_name">Notebook</string>
     <string name="test_text">Test note</string>
+    <string name="head_note1"> заметка 1</string>
+    <string name="head_note2"> заметка 2</string>
+    <string name="head_note3"> заметка 3</string>
+    <string name="content_note1"> содержимое заметки 1</string>
+    <string name="content_note2"> содержимое заметки 2</string>
+    <string name="content_note3"> содержимое заметки 3</string>
+    <string name="date_note">Date note</string>
+    <string name="btn_date">date</string>
+    <string name="btn_time">time</string>
+    <string name="text_note">Time note</string>
+    <string name="search">search</string>
+    <string name="add">add</string>
+    <string name="edit">edit</string>
+    <string name="delete">delete</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="about_app">About APP</string>
+    <string name="about_app_content">Приложение \'Заметки\' разработано в рамках обучения в GeekBrains</string>
+    <string name="mail">asde@gmail.com</string>
+    <string name="username">Android Studio</string>
 </resources>

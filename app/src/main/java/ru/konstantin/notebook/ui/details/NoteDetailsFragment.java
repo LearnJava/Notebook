@@ -49,11 +49,13 @@ public class NoteDetailsFragment extends Fragment {
         TextView noteText = view.findViewById(R.id.note_text);
         TextView noteDate = view.findViewById(R.id.note_date);
 
-        Note note = getArguments().getParcelable(ARG_NOTE);
-
-        noteId.setText(String.valueOf(note.getId()));
-        noteDesc.setText(note.getDescription());
-        noteText.setText(note.getNote());
-        noteDate.setText(String.valueOf(LocalDateTime.ofInstant(Instant.ofEpochMilli(note.getNoteDate()), ZoneId.systemDefault())));
+        Note note = null;
+        if (getArguments() != null) {
+            note = getArguments().getParcelable(ARG_NOTE);
+            noteId.setText(String.valueOf(note.getId()));
+            noteDesc.setText(note.getDescription());
+            noteText.setText(note.getNote());
+            noteDate.setText(String.valueOf(LocalDateTime.ofInstant(Instant.ofEpochMilli(note.getNoteDate()), ZoneId.systemDefault())));
+        }
     }
 }

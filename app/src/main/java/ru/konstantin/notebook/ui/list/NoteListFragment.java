@@ -68,16 +68,13 @@ public class NoteListFragment extends Fragment {
 
         for (Note note: notes) {
             View itemView = LayoutInflater.from(requireContext()).inflate(R.layout.item_note, linearLayout, false);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (onNoteClicked != null) {
-                        onNoteClicked.onNoteClicked(note);
-                    }
+            itemView.setOnClickListener(v -> {
+                if (onNoteClicked != null) {
+                    onNoteClicked.onNoteClicked(note);
                 }
             });
             TextView noteView = itemView.findViewById(R.id.note_id);
-            noteView.setText("My note number " + note.getId());
+            noteView.setText(getResources().getString(R.string.note_template, note.getId()));
 
             linearLayout.addView(noteView);
         }

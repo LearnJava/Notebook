@@ -11,6 +11,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
@@ -18,6 +20,7 @@ import ru.konstantin.notebook.R;
 import ru.konstantin.notebook.entity.Note;
 import ru.konstantin.notebook.repository.NoteRepository;
 import ru.konstantin.notebook.repository.NoteRepositoryImpl;
+import ru.konstantin.notebook.ui.notes.NotesAdapter;
 
 public class NoteListFragment extends Fragment {
 
@@ -62,22 +65,22 @@ public class NoteListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        LinearLayout linearLayout = view.findViewById(R.id.note_list_container);
+        RecyclerView recyclerView = view.findViewById(R.id.notes_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         List<Note> notes = noteRepository.getNotes();
+        NotesAdapter notesAdapter = new NotesAdapter();
+        notesAdapter.setDate(notes);
 
-        for (Note note: notes) {
-            View itemView = LayoutInflater.from(requireContext()).inflate(R.layout.item_note, linearLayout, false);
-            itemView.setOnClickListener(v -> {
-                if (onNoteClicked != null) {
-                    onNoteClicked.onNoteClicked(note);
-                }
-            });
-            TextView noteView = itemView.findViewById(R.id.note_id);
-            noteView.setText(getResources().getString(R.string.note_template, note.getId()));
+        recyclerView.setAdapter(notesAdapter);
 
-            linearLayout.addView(noteView);
-        }
+        notesAdapter.notifyDataSetChanged();
+
+        notesAdapter.setListener(note -> {
+            if (onNoteClicked != null) {
+                onNoteClicked.onNoteClicked(note);
+            }
+        });
     }
 
     @Override

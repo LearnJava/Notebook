@@ -30,14 +30,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
-
-       /* setSupportActionBar(toolbar);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.container_list, new NotesListFragment())
-                .commit();
-*/
-
         DrawerLayout drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this,
@@ -73,10 +65,9 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
         if (isLandscape) {
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.notes_content_fragment, NoteDetailsFragment.newInstance(note))
+                    .replace(R.id.notes_details_fragment, NoteDetailsFragment.newInstance(note))
                     .commit();
         } else {
-
             Fragment listFragment = getSupportFragmentManager().findFragmentById(R.id.container_list);
             getSupportFragmentManager()
                     .beginTransaction()
@@ -84,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements NoteListFragment.
                     .hide(listFragment)
                     .addToBackStack(null)
                     .commit();
-
         }
     }
 

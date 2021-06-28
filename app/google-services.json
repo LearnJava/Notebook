@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "794548541327",
+    "project_id": "notebook-61502",
+    "storage_bucket": "notebook-61502.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:794548541327:android:b7196459bbbe32398d9dfa",
+        "android_client_info": {
+          "package_name": "ru.konstantin.notebook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "794548541327-is31bei1fj6bi2hu2pss4qiii0gaam3c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ru.konstantin.notebook",
+            "certificate_hash": "d3f42176b5c4b09997bae238c504de6247479ba4"
+          }
+        },
+        {
+          "client_id": "794548541327-2bml5o16so7onv1uoc6kn6c0dh7merfd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbjLx302uR4XoiCAwypPp6zHzT2UvG4tI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "794548541327-2bml5o16so7onv1uoc6kn6c0dh7merfd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

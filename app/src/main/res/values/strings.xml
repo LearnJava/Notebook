@@ -23,4 +23,11 @@
     <string name="about_app_content">Приложение \'Заметки\' разработано в рамках обучения в GeekBrains</string>
     <string name="mail">asde@gmail.com</string>
     <string name="username">Android Studio</string>
+    <string name="edit_fragment">Edit note</string>
+    <string name="action_add">Add</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_apply">Apply</string>
+    <string name="new_note">Новая запись</string>
 </resources>

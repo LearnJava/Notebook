@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,12 +32,9 @@ import ru.konstantin.notebook.ui.notes.NotesAdapter;
 
 public class NoteListFragment extends Fragment {
 
-    public static NoteListFragment newInstance() {
-        NoteListFragment fragment = new NoteListFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+    public static final String UPDATE_BUNDLE = "UPDATE_BUNDLE";
+    public static final String ADD_NOTE = "ADD_NOTE";
+    public static final String UPDATE_NOTE = "UPDATE_NOTE";
 
     public interface OnNoteClicked {
         void onNoteClicked(Note note);
@@ -84,6 +82,25 @@ public class NoteListFragment extends Fragment {
             }
         });
 
+        // Обмен между фрагментами...
+        getParentFragmentManager().setFragmentResultListener(EditNoteFragment.UPDATE_RESULT, this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                if (result.containsKey(EditNoteFragment.ADD_NEW_RESULT)) {
+
+                    Note note = result.getParcelable(EditNoteFragment.ADD_NEW_RESULT);
+                    notesAdapter.notifyItemChanged(notesAdapter.add(note));
+                    notesAdapter.notifyDataSetChanged();
+                } else if (result.containsKey(EditNoteFragment.UPDATE_RESULT)) {
+
+                    Note note = result.getParcelable(EditNoteFragment.UPDATE_RESULT);
+                    notesAdapter.update(note);
+                    notesAdapter.notifyItemChanged(longClickedIndex);
+                    notesAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+        // Обмен между фрагментами...
 
         isLoading = true;
 
@@ -113,8 +130,6 @@ public class NoteListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView recyclerView = view.findViewById(R.id.notes_list);
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-
-//        List<Note> notes = noteRepository.getNotes();
 
         noteRepository.getNotes(new Callback<List<Note>>() {
             @Override
@@ -188,6 +203,10 @@ public class NoteListFragment extends Fragment {
     public boolean onContextItemSelected(@NonNull MenuItem item) {
 
         if (item.getItemId() == R.id.action_edit) {
+
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(UPDATE_NOTE, longClickedNote);
+            getParentFragmentManager().setFragmentResult(UPDATE_BUNDLE, bundle);
 
             myContext.getSupportFragmentManager()
                     .beginTransaction()

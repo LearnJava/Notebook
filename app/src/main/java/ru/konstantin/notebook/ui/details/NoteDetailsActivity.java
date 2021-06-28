@@ -21,7 +21,8 @@ public class NoteDetailsActivity extends AppCompatActivity {
 
             getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.container, NoteDetailsFragment.newInstance(note))
+//                    .replace(R.id.container, NoteDetailsFragment.newInstance(note))
+                    .replace(R.id.container, EditNoteFragment.newInstance(note))
                     .commit();
         }
     }

@@ -54,7 +54,7 @@ public class NoteDetailsFragment extends Fragment {
             note = getArguments().getParcelable(ARG_NOTE);
             noteId.setText(String.valueOf(note.getId()));
             noteDesc.setText(note.getDescription());
-            noteText.setText(note.getNote());
+            noteText.setText(note.getNoteText());
             noteDate.setText(String.valueOf(LocalDateTime.ofInstant(Instant.ofEpochMilli(note.getNoteDate()), ZoneId.systemDefault())));
         }
     }

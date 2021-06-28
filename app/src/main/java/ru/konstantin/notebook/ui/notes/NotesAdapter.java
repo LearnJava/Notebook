@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -16,8 +17,29 @@ import ru.konstantin.notebook.entity.Note;
 
 public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHolder> {
 
+
     public interface OnNoteClickedListener {
         void onNoteClickedListener(@NonNull Note note);
+    }
+
+    public interface OnNoteLongClickedListener {
+        void onNoteLongClickedListener(@NonNull Note note, int index);
+    }
+
+    Fragment fragment;
+
+    public NotesAdapter(Fragment fragment) {
+        this.fragment = fragment;
+    }
+
+    private OnNoteLongClickedListener longClickedListener;
+
+    public OnNoteLongClickedListener getLongClickedListener() {
+        return longClickedListener;
+    }
+
+    public void setLongClickedListener(OnNoteLongClickedListener longClickedListener) {
+        this.longClickedListener = longClickedListener;
     }
 
     private final ArrayList<Note> notes = new ArrayList<>();
@@ -25,6 +47,15 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     public void setDate(List<Note> toSet) {
         notes.clear();
         notes.addAll(toSet);
+    }
+
+    public int add(Note note) {
+        notes.add(note);
+        return notes.size() - 1;
+    }
+
+    public void remove(Note longClickedNote) {
+        notes.remove(longClickedNote);
     }
 
     private OnNoteClickedListener listener;
@@ -48,8 +79,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
     @Override
     public void onBindViewHolder(@NonNull NotesAdapter.NotesViewHolder holder, int position) {
         Note note = notes.get(position);
-
-        holder.noteView.setText("My note number " + note.getId());
+        holder.noteView.setText(note.getDescription());
 
     }
 
@@ -63,12 +93,30 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
         public NotesViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            fragment.registerForContextMenu(itemView);
+
             itemView.setOnClickListener(v -> {
                 if (getListener() != null) {
                     getListener().onNoteClickedListener(notes.get(getAdapterPosition()));
                 }
             });
-            noteView = itemView.findViewById(R.id.note_id);
+
+            itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    itemView.showContextMenu();
+
+                    if (getLongClickedListener() != null) {
+                        int index = getAdapterPosition();
+                        getLongClickedListener().onNoteLongClickedListener(notes.get(index), index);
+                    }
+
+                    return true;
+                }
+            });
+
+            noteView = itemView.findViewById(R.id.note_desc);
         }
     }
 

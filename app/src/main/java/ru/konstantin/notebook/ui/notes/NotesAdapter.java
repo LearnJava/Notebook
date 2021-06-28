@@ -54,6 +54,22 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         return notes.size() - 1;
     }
 
+    public void update(Note note) {
+
+        for (int i = 0; i < notes.size(); i++) {
+
+            Note item = notes.get(i);
+
+            if (item.getId().equals(note.getId())) {
+
+                notes.remove(i);
+                notes.add(i, note);
+
+//                return;
+            }
+        }
+    }
+
     public void remove(Note longClickedNote) {
         notes.remove(longClickedNote);
     }

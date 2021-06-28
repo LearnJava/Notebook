@@ -100,9 +100,7 @@ public class NoteFirestoreRepositoryImpl implements NoteRepository {
     }
 
     @Override
-    public Note edit(Note note, String desc, String noteText, Date date) {
+    public Note edit(Note note, Callback<Note> callback) {
         return null;
     }
-
-
 }

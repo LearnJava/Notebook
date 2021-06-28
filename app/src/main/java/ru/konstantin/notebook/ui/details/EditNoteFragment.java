@@ -33,7 +33,10 @@ import ru.konstantin.notebook.ui.notes.NotesAdapter;
 public class EditNoteFragment extends Fragment {
 
     public static final String TAG = "EditNoteFragment";
-    private static final String ARG_NOTE = "ARG_NOTE";
+    public static final String ARG_NOTE = "ARG_NOTE";
+    public static final String UPDATE_RESULT = "UPDATE_RESULT";
+    public static final String ADD_NEW_RESULT = "ADD_NEW_RESULT";
+    public static final String IS_UPDATE = "IS_UPDATE";
 
     FragmentActivity myContext;
     private NotesAdapter notesAdapter;
@@ -93,36 +96,50 @@ public class EditNoteFragment extends Fragment {
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.action_apply) {
 
-//                    EditText noteDesc = view.findViewById(R.id.description_edit);
-//                    EditText noteText = view.findViewById(R.id.note_text_edit);
+                    Bundle bundle = new Bundle();
 
-                    Note note = new Note();
+                    Note note = getArguments().getParcelable(ARG_NOTE);
                     note.setDescription(noteDesc.getText().toString());
                     note.setNoteText(noteText.getText().toString());
 
                     Calendar calendar = new GregorianCalendar(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth());
                     note.setNoteDate(calendar.getTimeInMillis());
-                    myContext.getSupportFragmentManager()
-                            .beginTransaction()
-                            .addToBackStack(EditNoteFragment.TAG)
-                            .add(R.id.container, NoteListFragment.newInstance())
-                            .commit();
-                    noteRepository.add(note, new Callback<Note>() {
 
-                        @Override
-                        public void onSuccess(Note result) {
+                    if (note.getId() == null) {
+                        bundle.putBoolean(IS_UPDATE, false);
+                        noteRepository.add(note, new Callback<Note>() {
 
-                            int index = notesAdapter.add(result);
+                            @Override
+                            public void onSuccess(Note result) {
+                                bundle.putParcelable(ARG_NOTE, result);
+                                getParentFragmentManager().setFragmentResult(UPDATE_RESULT, bundle);
+                                // Общение между фрагментами (результат работы фрагмента)...
+                                myContext.getSupportFragmentManager().popBackStack();
+                            }
+                        });
+                    } else {
+                        //вместо метода update. Удаляем старую заметку и добавляем новую,
+                        // но так как сортируем мы по полю даты, то появится заметка в адаптере на том же месте
+                        bundle.putBoolean(IS_UPDATE, true);
+                        noteRepository.remove(note, new Callback<Note>() {
+                            @Override
+                            public void onSuccess(Note result) {
 
-                            notesAdapter.notifyItemInserted(index);
-                            notesAdapter.notifyDataSetChanged();
+                            }
+                        });
 
-                            recyclerView.scrollToPosition(index);
-                        }
-                    });
+                        noteRepository.add(note, new Callback<Note>() {
+                            @Override
+                            public void onSuccess(Note result) {
+                                bundle.putParcelable(ARG_NOTE, result);
+                                getParentFragmentManager().setFragmentResult(UPDATE_RESULT, bundle);
+                                // Общение между фрагментами (результат работы фрагмента)...
 
+                                myContext.getSupportFragmentManager().popBackStack();
+                            }
+                        });
+                    }
                     return true;
-
                 }
                 return false;
             }

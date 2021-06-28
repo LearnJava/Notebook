@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -31,13 +32,6 @@ import ru.konstantin.notebook.ui.notes.NotesAdapter;
 
 public class NoteListFragment extends Fragment {
 
-    public static NoteListFragment newInstance() {
-        NoteListFragment fragment = new NoteListFragment();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
-
     public interface OnNoteClicked {
         void onNoteClicked(Note note);
     }
@@ -48,7 +42,7 @@ public class NoteListFragment extends Fragment {
 
     FragmentActivity myContext;
 
-    private NoteRepository noteRepository = new NoteFirestoreRepositoryImpl();
+    private final NoteRepository noteRepository = new NoteFirestoreRepositoryImpl();
     private OnNoteClicked onNoteClicked;
     private NotesAdapter notesAdapter;
 
@@ -84,6 +78,25 @@ public class NoteListFragment extends Fragment {
             }
         });
 
+        // Обмен между фрагментами...
+        getParentFragmentManager().setFragmentResultListener(EditNoteFragment.UPDATE_RESULT, this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                if (!result.getBoolean(EditNoteFragment.IS_UPDATE)) {
+
+                    Note note = result.getParcelable(EditNoteFragment.ARG_NOTE);
+                    notesAdapter.notifyItemChanged(notesAdapter.add(note));
+                    notesAdapter.notifyDataSetChanged();
+                } else if (result.getBoolean(EditNoteFragment.IS_UPDATE)) {
+
+                    Note note = result.getParcelable(EditNoteFragment.ARG_NOTE);
+                    notesAdapter.update(note);
+                    notesAdapter.notifyItemChanged(longClickedIndex);
+                    notesAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+        // Обмен между фрагментами...
 
         isLoading = true;
 
@@ -113,8 +126,6 @@ public class NoteListFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         RecyclerView recyclerView = view.findViewById(R.id.notes_list);
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-
-//        List<Note> notes = noteRepository.getNotes();
 
         noteRepository.getNotes(new Callback<List<Note>>() {
             @Override

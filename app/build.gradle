@@ -3,6 +3,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        notekey {
+            storeFile file('./notekey.jks')
+            storePassword 'passpass'
+            keyAlias 'notekey'
+            keyPassword 'passpass'
+        }
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
 
@@ -14,12 +22,17 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.notekey
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+
+        debug {
+            signingConfig signingConfigs.notekey
         }
     }
     compileOptions {

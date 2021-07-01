@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "691829146317",
+    "project_id": "notebookgb-e723b",
+    "storage_bucket": "notebookgb-e723b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:691829146317:android:743f553482a4dcb75c5f84",
+        "android_client_info": {
+          "package_name": "ru.konstantin.notebook"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "691829146317-gd1mvjb46lsfani5b5tlf0riqubuq67i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "ru.konstantin.notebook",
+            "certificate_hash": "52c963e9650e5e7998e649891e4f681b37906fa5"
+          }
+        },
+        {
+          "client_id": "691829146317-jdmg0deq2fj77t96das7bgs1fvlccdcq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDCIXcXfhtYCB78NS5oDllfHsVAtBE5krc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "691829146317-jdmg0deq2fj77t96das7bgs1fvlccdcq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

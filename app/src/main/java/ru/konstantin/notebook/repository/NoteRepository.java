@@ -5,5 +5,14 @@ import java.util.List;
 import ru.konstantin.notebook.entity.Note;
 
 public interface NoteRepository {
-    List<Note> getNotes();
+
+    void getNotes(Callback<List<Note>> callback);
+
+    Note add(Note note);
+
+    void clear();
+
+    void remove(Note note);
+
+    Note edit(Note note);
 }

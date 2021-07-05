@@ -16,8 +16,8 @@ import java.util.List;
 
 import ru.konstantin.notebook.R;
 import ru.konstantin.notebook.entity.Note;
-import ru.konstantin.notebook.repository.NoteRepository;
-import ru.konstantin.notebook.repository.NoteRepositoryImpl;
+import ru.konstantin.notebook.repository.Callback;
+import ru.konstantin.notebook.repository.NoteFirestoreRepositoryImpl;
 
 public class NoteListFragment extends Fragment {
 
@@ -25,7 +25,8 @@ public class NoteListFragment extends Fragment {
         void onNoteClicked(Note note);
     }
 
-    private NoteRepository noteRepository;
+    private NoteFirestoreRepositoryImpl noteFirestoreRepositoryImpl;
+    private NotesAdapter notesAdapter;
 
     private OnNoteClicked onNoteClicked;
 
@@ -49,7 +50,7 @@ public class NoteListFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        noteRepository = new NoteRepositoryImpl();
+        noteFirestoreRepositoryImpl = new NoteFirestoreRepositoryImpl();
     }
 
     @Nullable
@@ -64,7 +65,21 @@ public class NoteListFragment extends Fragment {
 
         LinearLayout linearLayout = view.findViewById(R.id.note_list_container);
 
-        List<Note> notes = noteRepository.getNotes();
+//        List<Note> notes = noteFirestoreRepositoryImpl.getNotes();
+
+        noteFirestoreRepositoryImpl.getNotes(new Callback<List<Note>>() {
+            @Override
+            public void onSuccess(List<Note> result) {
+                notesAdapter.setData(result);
+                notesAdapter.notifyDataSetChanged();
+
+                isLoading = false;
+
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
 
         for (Note note: notes) {
             View itemView = LayoutInflater.from(requireContext()).inflate(R.layout.item_note, linearLayout, false);

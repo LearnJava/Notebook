@@ -3,28 +3,26 @@ package ru.konstantin.notebook.entity;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Date;
-
 public class Note implements Parcelable {
 
 //    public Note() {}
 
-    public Note(long id, String description, String note, long noteDate) {
+    public Note(String id, String description, String note, long noteDate) {
         this.id = id;
         this.description = description;
-        this.note = note;
+        this.noteText = note;
         this.noteDate = noteDate;
     }
 
-    private long id;
+    private String id;
     private String description;
-    private String note;
+    private String noteText;
     private long noteDate;
 
     protected Note(Parcel in) {
-        id = in.readLong();
+        id = in.readString();
         description = in.readString();
-        note = in.readString();
+        noteText = in.readString();
         noteDate = in.readLong();
     }
 
@@ -40,11 +38,11 @@ public class Note implements Parcelable {
         }
     };
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -56,12 +54,12 @@ public class Note implements Parcelable {
         this.description = description;
     }
 
-    public String getNote() {
-        return note;
+    public String getNoteText() {
+        return noteText;
     }
 
-    public void setNote(String note) {
-        this.note = note;
+    public void setNoteText(String noteText) {
+        this.noteText = noteText;
     }
 
     public long getNoteDate() {
@@ -79,9 +77,9 @@ public class Note implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(id);
+        dest.writeString(id);
         dest.writeString(description);
-        dest.writeString(note);
+        dest.writeString(noteText);
         dest.writeLong(noteDate);
     }
 }

@@ -35,13 +35,10 @@ public class EditNoteFragment extends Fragment {
     public static final String TAG = "EditNoteFragment";
     public static final String ARG_NOTE = "ARG_NOTE";
     public static final String UPDATE_RESULT = "UPDATE_RESULT";
-    public static final String ADD_NEW_RESULT = "ADD_NEW_RESULT";
     public static final String IS_UPDATE = "IS_UPDATE";
 
     FragmentActivity myContext;
-    private NotesAdapter notesAdapter;
     private NoteRepository noteRepository;
-
 
     public static EditNoteFragment newInstance(Note note) {
         EditNoteFragment fragment = new EditNoteFragment();
@@ -67,8 +64,6 @@ public class EditNoteFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        RecyclerView recyclerView = view.findViewById(R.id.notes_list);
 
         Note note = getArguments().getParcelable(ARG_NOTE);
         EditText noteDesc = view.findViewById(R.id.description_edit);

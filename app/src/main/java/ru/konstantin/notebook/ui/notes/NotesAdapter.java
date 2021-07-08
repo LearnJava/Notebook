@@ -44,6 +44,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
     private final ArrayList<Note> notes = new ArrayList<>();
 
+
     public void setData(List<Note> toSet) {
         notes.clear();
         notes.addAll(toSet);
@@ -70,7 +71,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
         }
     }
 
-    public void remove(Note longClickedNote) {
+  public void remove(Note longClickedNote) {
         notes.remove(longClickedNote);
     }
 

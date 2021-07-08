@@ -200,6 +200,10 @@ public class NoteListFragment extends Fragment {
 
         if (item.getItemId() == R.id.action_edit) {
 
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(UPDATE_NOTE, longClickedNote);
+            getParentFragmentManager().setFragmentResult(UPDATE_BUNDLE, bundle);
+
             myContext.getSupportFragmentManager()
                     .beginTransaction()
                     .addToBackStack(EditNoteFragment.TAG)

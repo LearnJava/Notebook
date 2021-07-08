@@ -71,6 +71,7 @@ public class EditNoteFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.notes_list);
 
         Note note = getArguments().getParcelable(ARG_NOTE);
+        Note updateNote = getArguments().getParcelable(NoteListFragment.UPDATE_NOTE);
         EditText noteDesc = view.findViewById(R.id.description_edit);
         EditText noteText = view.findViewById(R.id.note_text_edit);
 

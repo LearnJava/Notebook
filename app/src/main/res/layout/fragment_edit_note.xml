@@ -10,10 +10,14 @@
         android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar_apply"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:title="@string/edit_fragment" />
-    </com.google.android.material.appbar.AppBarLayout>
+            app:menu="@menu/menu_apply"
+            app:title="@string/new_note"
+            />
+
+  </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"

@@ -8,21 +8,30 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.ProgressBar;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+
+import androidx.fragment.app.FragmentResultListener;
+
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Collections;
+
+import java.util.Date;
+
 import java.util.List;
 
 import ru.konstantin.notebook.R;
 import ru.konstantin.notebook.entity.Note;
+import ru.konstantin.notebook.repository.Callback;
+import ru.konstantin.notebook.repository.NoteFirestoreRepositoryImpl;
 import ru.konstantin.notebook.repository.NoteRepository;
-import ru.konstantin.notebook.repository.NoteRepositoryImpl;
 import ru.konstantin.notebook.ui.details.EditNoteFragment;
 import ru.konstantin.notebook.ui.notes.NotesAdapter;
 
@@ -32,9 +41,13 @@ public class NoteListFragment extends Fragment {
         void onNoteClicked(Note note);
     }
 
+    private boolean isLoading = false;
+
+    private ProgressBar progressBar;
+
     FragmentActivity myContext;
 
-    private NoteRepository noteRepository;
+    private final NoteRepository noteRepository = new NoteFirestoreRepositoryImpl();
     private OnNoteClicked onNoteClicked;
     private NotesAdapter notesAdapter;
 
@@ -60,15 +73,49 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         notesAdapter = new NotesAdapter(this);
-        noteRepository = new NoteRepositoryImpl();
 
         notesAdapter.setLongClickedListener(new NotesAdapter.OnNoteLongClickedListener() {
             @Override
-            public void onNoteLongClickedListener(@NonNull  Note note, int index) {
+            public void onNoteLongClickedListener(@NonNull Note note, int index) {
                 longClickedIndex = index;
                 longClickedNote = note;
+            }
+        });
+
+        // Обмен между фрагментами...
+        getParentFragmentManager().setFragmentResultListener(EditNoteFragment.UPDATE_RESULT, this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                if (!result.getBoolean(EditNoteFragment.IS_UPDATE)) {
+
+                    Note note = result.getParcelable(EditNoteFragment.ARG_NOTE);
+                    notesAdapter.notifyItemChanged(notesAdapter.add(note));
+                    notesAdapter.notifyDataSetChanged();
+                } else if (result.getBoolean(EditNoteFragment.IS_UPDATE)) {
+
+                    Note note = result.getParcelable(EditNoteFragment.ARG_NOTE);
+                    notesAdapter.update(note);
+                    notesAdapter.notifyItemChanged(longClickedIndex);
+                    notesAdapter.notifyDataSetChanged();
+                }
+            }
+        });
+        // Обмен между фрагментами...
+
+        isLoading = true;
+
+        noteRepository.getNotes(new Callback<List<Note>>() {
+            @Override
+            public void onSuccess(List<Note> result) {
+                notesAdapter.setData(result);
+                notesAdapter.notifyDataSetChanged();
+
+                isLoading = false;
+
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
             }
         });
     }
@@ -85,25 +132,39 @@ public class NoteListFragment extends Fragment {
         RecyclerView recyclerView = view.findViewById(R.id.notes_list);
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
-        List<Note> notes = noteRepository.getNotes();
-        notesAdapter.setDate(notes);
+        noteRepository.getNotes(new Callback<List<Note>>() {
+            @Override
+            public void onSuccess(List<Note> result) {
+                notesAdapter.setData(result);
+                notesAdapter.notifyDataSetChanged();
+
+                isLoading = false;
+
+                if (progressBar != null) {
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        });
+
         Toolbar toolbar = view.findViewById(R.id.toolbar_2);
 
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.action_add) {
-//                    noteRepository.add("Заметка для кота", "не забыть поспать");
-
-                    int index = notesAdapter.add(noteRepository.add("Заметка для кота", "не забыть поспать"));
-                    notesAdapter.notifyItemInserted(index);
-                    recyclerView.scrollToPosition(index);
+                    Note note = new Note();
+                    note.setNoteDate(new Date().getTime());
+                    myContext.getSupportFragmentManager()
+                            .beginTransaction()
+                            .addToBackStack(EditNoteFragment.TAG)
+                            .add(R.id.container, EditNoteFragment.newInstance(note))
+                            .commit();
                     return true;
                 }
 
                 if (item.getItemId() == R.id.action_clear) {
                     noteRepository.clear();
-                    notesAdapter.setDate(Collections.emptyList());
+                    notesAdapter.setData(Collections.emptyList());
                     notesAdapter.notifyDataSetChanged();
                     return true;
                 }
@@ -140,7 +201,7 @@ public class NoteListFragment extends Fragment {
     }
 
     @Override
-    public boolean onContextItemSelected(@NonNull  MenuItem item) {
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
 
         if (item.getItemId() == R.id.action_edit) {
 
@@ -153,11 +214,13 @@ public class NoteListFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_delete) {
-            noteRepository.remove(longClickedNote);
-
-            notesAdapter.remove(longClickedNote);
-            notesAdapter.notifyItemRemoved(longClickedIndex);
-
+            noteRepository.remove(longClickedNote, new Callback<Note>() {
+                @Override
+                public void onSuccess(Note result) {
+                    notesAdapter.remove(longClickedNote);
+                    notesAdapter.notifyItemRemoved(longClickedIndex);
+                }
+            });
             return true;
         }
 

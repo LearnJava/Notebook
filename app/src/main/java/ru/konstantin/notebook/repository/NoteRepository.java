@@ -6,9 +6,12 @@ import java.util.List;
 import ru.konstantin.notebook.entity.Note;
 
 public interface NoteRepository {
-    List<Note> getNotes();
+    void getNotes(Callback<List<Note>> callback);
     void clear();
-    Note add(String desc, String noteText);
-    void remove(Note note);
-    Note edit(Note note, String desc, String noteText, Date date);
+    void add(Note note, Callback<Note> callback);
+
+    void remove(Note note, Callback<Note> callback);
+
+    Note edit(Note note, Callback<Note> callback);
+
 }

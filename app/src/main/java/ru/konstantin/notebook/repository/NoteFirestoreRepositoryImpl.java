@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -39,7 +40,13 @@ public class NoteFirestoreRepositoryImpl implements NoteRepository {
 
                             ArrayList<Note> result = new ArrayList<>();
 
-                            for (QueryDocumentSnapshot document : task.getResult()) {
+                            QuerySnapshot tasks = task.getResult();
+                            if( tasks == null ) {
+                                return;
+                            }
+                            List<DocumentSnapshot> docs = tasks.getDocuments();
+
+                            for (DocumentSnapshot document : docs) {
                                 String noteText = (String) document.get(NOTE_TEXT);
                                 String desc = (String) document.get(DESC);
                                 Long longDate = Long.parseLong(document.get(NOTE_DATE).toString());

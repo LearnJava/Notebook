@@ -5,7 +5,6 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -13,14 +12,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.EditText;
 
 import java.util.Calendar;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -38,11 +35,9 @@ public class EditNoteFragment extends Fragment {
     public static final String TAG = "EditNoteFragment";
     public static final String ARG_NOTE = "ARG_NOTE";
     public static final String UPDATE_RESULT = "UPDATE_RESULT";
-    public static final String ADD_NEW_RESULT = "ADD_NEW_RESULT";
     public static final String IS_UPDATE = "IS_UPDATE";
 
     FragmentActivity myContext;
-    private NotesAdapter notesAdapter;
     private NoteRepository noteRepository;
 
     public static EditNoteFragment newInstance(Note note) {
@@ -69,9 +64,6 @@ public class EditNoteFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        RecyclerView recyclerView = view.findViewById(R.id.notes_list);
-
 
         Note note = getArguments().getParcelable(ARG_NOTE);
         EditText noteDesc = view.findViewById(R.id.description_edit);

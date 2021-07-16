@@ -65,8 +65,7 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
 
                 notes.remove(i);
                 notes.add(i, note);
-
-//                return;
+                return;
             }
         }
     }
@@ -136,5 +135,4 @@ public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.NotesViewHol
             noteView = itemView.findViewById(R.id.note_desc);
         }
     }
-
 }

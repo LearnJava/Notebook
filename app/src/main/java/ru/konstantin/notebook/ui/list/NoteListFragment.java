@@ -1,6 +1,7 @@
 package ru.konstantin.notebook.ui.list;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -196,7 +198,6 @@ public class NoteListFragment extends Fragment {
     @Override
     public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-
         requireActivity().getMenuInflater().inflate(R.menu.notes_context, menu);
     }
 
@@ -217,8 +218,8 @@ public class NoteListFragment extends Fragment {
             noteRepository.remove(longClickedNote, new Callback<Note>() {
                 @Override
                 public void onSuccess(Note result) {
-                    notesAdapter.remove(longClickedNote);
-                    notesAdapter.notifyItemRemoved(longClickedIndex);
+                    showAlertDeleteDialog();
+
                 }
             });
             return true;
@@ -227,4 +228,27 @@ public class NoteListFragment extends Fragment {
         return super.onContextItemSelected(item);
 
     }
+
+    private void showAlertDeleteDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
+                .setTitle(R.string.delete_dialog)
+                .setMessage(R.string.delete_message)
+                .setPositiveButton(R.string.yes_delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        notesAdapter.remove(longClickedNote);
+                        notesAdapter.notifyItemRemoved(longClickedIndex);
+                    }
+                })
+                .setNegativeButton(R.string.not_delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+
+        builder.show();
+    }
+
+
 }

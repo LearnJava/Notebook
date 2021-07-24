@@ -1,113 +1,71 @@
-package ru.konstantin.notebook.repository;
+package ru.konstantin.notebook.repository
 
-import androidx.annotation.NonNull;
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
+import ru.konstantin.notebook.entity.Note
+import java.util.*
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
-import ru.konstantin.notebook.entity.Note;
-
-public class NoteFirestoreRepositoryImpl implements NoteRepository {
-
-    FirebaseFirestore firebaseFirestore = FirebaseFirestore.getInstance();
-    public static final String NOTES = "notes";
-    public static final String NOTE_DATE = "noteDate";
-    public static final String DESC = "description";
-    public static final String NOTE_TEXT = "noteText";
-
-    @Override
-    public void getNotes(Callback<List<Note>> callback) {
+class NoteFirestoreRepositoryImpl : NoteRepository {
+    var firebaseFirestore = FirebaseFirestore.getInstance()
+    override fun getNotes(callback: Callback<List<Note>>) {
         firebaseFirestore.collection(NOTES)
-                .orderBy(NOTE_DATE, Query.Direction.ASCENDING)
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-
-                        if (task.isSuccessful()) {
-
-                            ArrayList<Note> result = new ArrayList<>();
-
-                            QuerySnapshot tasks = task.getResult();
-                            if( tasks == null ) {
-                                return;
-                            }
-                            List<DocumentSnapshot> docs = tasks.getDocuments();
-
-                            for (DocumentSnapshot document : docs) {
-                                String noteText = (String) document.get(NOTE_TEXT);
-                                String desc = (String) document.get(DESC);
-                                Long longDate = Long.parseLong(document.get(NOTE_DATE).toString());
-                                Date noteDate = new Date(longDate);
-
-                                result.add(new Note(document.getId(), desc, noteText, noteDate.getTime()));
-                            }
-
-                            callback.onSuccess(result);
-
-                        } else {
-                            task.getException();
-                        }
+            .orderBy(NOTE_DATE, Query.Direction.ASCENDING)
+            .get()
+            .addOnCompleteListener(OnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val result = ArrayList<Note>()
+                    val tasks = task.result ?: return@OnCompleteListener
+                    val docs = tasks.documents
+                    for (document in docs) {
+                        val noteText = document[NOTE_TEXT] as String?
+                        val desc = document[DESC] as String?
+                        val longDate = document[NOTE_DATE].toString().toLong()
+                        val noteDate = Date(longDate)
+                        result.add(Note(document.id, desc, noteText, noteDate.time))
                     }
-                });
+                    callback.onSuccess(result)
+                } else {
+                    task.exception
+                }
+            })
     }
 
-    @Override
-    public void add(Note note, Callback<Note> callback) {
-
-        HashMap<String, Object> data = new HashMap<>();
-
-        data.put(DESC, note.getDescription());
-        data.put(NOTE_TEXT, note.getNoteText());
-        data.put(NOTE_DATE, note.getNoteDate());
-
+    override fun add(note: Note, callback: Callback<Note>) {
+        val data = HashMap<String, Any?>()
+        data[DESC] = note.description
+        data[NOTE_TEXT] = note.noteText
+        data[NOTE_DATE] = note.noteDate
         firebaseFirestore.collection(NOTES)
-                .add(data)
-                .addOnCompleteListener(new OnCompleteListener<DocumentReference>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentReference> task) {
-                        if (task.isSuccessful()) {
-                            note.setId(task.getResult().getId());
-                            callback.onSuccess(note);
-                        }
-                    }
-                });
+            .add(data)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    note.id = task.result!!.id
+                    callback.onSuccess(note)
+                }
+            }
     }
 
-    @Override
-    public void clear() {
-
-    }
-
-    @Override
-    public void remove(Note note, Callback<Note> callback) {
+    override fun clear() {}
+    override fun remove(note: Note, callback: Callback<Note>) {
         firebaseFirestore.collection(NOTES)
-                .document(note.getId())
-                .delete()
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (task.isSuccessful()) {
-                            callback.onSuccess(note);
-                        }
-                    }
-                });
+            .document(note.id!!)
+            .delete()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    callback.onSuccess(note)
+                }
+            }
     }
 
-    @Override
-    public Note edit(Note note, Callback<Note> callback) {
-        return null;
+    override fun edit(note: Note?, callback: Callback<Note?>?): Note? {
+        return null
+    }
+
+    companion object {
+        const val NOTES = "notes"
+        const val NOTE_DATE = "noteDate"
+        const val DESC = "description"
+        const val NOTE_TEXT = "noteText"
     }
 }

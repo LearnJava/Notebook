@@ -1,61 +1,57 @@
-package ru.konstantin.notebook.ui.details;
+package ru.konstantin.notebook.ui.details
 
-import android.os.Build;
-import android.os.Bundle;
+import android.os.Build
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.annotation.RequiresApi
+import androidx.fragment.app.Fragment
+import ru.konstantin.notebook.R
+import ru.konstantin.notebook.entity.Note
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.fragment.app.Fragment;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
-import ru.konstantin.notebook.R;
-import ru.konstantin.notebook.entity.Note;
-
-public class NoteDetailsFragment extends Fragment {
-
-    public static final String ARG_NOTE = "ARG_NOTE";
-
-    public static NoteDetailsFragment newInstance(Note note) {
-        NoteDetailsFragment noteDetailsFragment = new NoteDetailsFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(ARG_NOTE, note);
-        noteDetailsFragment.setArguments(bundle);
-        return noteDetailsFragment;
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+class NoteDetailsFragment : Fragment() {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_note_details, container, false);
+        return inflater.inflate(R.layout.fragment_note_details, container, false)
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val noteId = view.findViewById<TextView>(R.id.id)
+        val noteDesc = view.findViewById<TextView>(R.id.description)
+        val noteText = view.findViewById<TextView>(R.id.note_text)
+        val noteDate = view.findViewById<TextView>(R.id.note_date)
+        var note: Note? = null
+        if (arguments != null) {
+            note = arguments?.getParcelable(ARG_NOTE)?:Note()
+            noteId.text = note!!.id.toString()
+            noteDesc.text = note.description
+            noteText.text = note.noteText
+            noteDate.text = LocalDateTime.ofInstant(
+                Instant.ofEpochMilli(note.noteDate),
+                ZoneId.systemDefault()
+            ).toString()
+        }
+    }
 
-        TextView noteId = view.findViewById(R.id.id);
-        TextView noteDesc = view.findViewById(R.id.description);
-        TextView noteText = view.findViewById(R.id.note_text);
-        TextView noteDate = view.findViewById(R.id.note_date);
-
-        Note note = null;
-        if (getArguments() != null) {
-            note = getArguments().getParcelable(ARG_NOTE);
-            noteId.setText(String.valueOf(note.getId()));
-            noteDesc.setText(note.getDescription());
-            noteText.setText(note.getNoteText());
-            noteDate.setText(String.valueOf(LocalDateTime.ofInstant(Instant.ofEpochMilli(note.getNoteDate()), ZoneId.systemDefault())));
+    companion object {
+        const val ARG_NOTE = "ARG_NOTE"
+        @JvmStatic
+        fun newInstance(note: Note?): NoteDetailsFragment {
+            val noteDetailsFragment = NoteDetailsFragment()
+            val bundle = Bundle()
+            bundle.putParcelable(ARG_NOTE, note)
+            noteDetailsFragment.arguments = bundle
+            return noteDetailsFragment
         }
     }
 }

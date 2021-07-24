@@ -1,29 +1,25 @@
-package ru.konstantin.notebook.ui.details;
+package ru.konstantin.notebook.ui.details
 
-import android.os.Bundle;
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import ru.konstantin.notebook.R
+import ru.konstantin.notebook.entity.Note
+import ru.konstantin.notebook.ui.details.EditNoteFragment.Companion.newInstance
 
-import androidx.appcompat.app.AppCompatActivity;
-
-import ru.konstantin.notebook.R;
-import ru.konstantin.notebook.entity.Note;
-
-public class NoteDetailsActivity extends AppCompatActivity {
-
-    public static final String ARG_NOTE = "ARG_NOTE";
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_note_details);
-
+class NoteDetailsActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_note_details)
         if (savedInstanceState == null) {
-            Note note = getIntent().getParcelableExtra(ARG_NOTE);
-
-            getSupportFragmentManager()
-                    .beginTransaction()
-//                    .replace(R.id.container, NoteDetailsFragment.newInstance(note))
-                    .replace(R.id.container, EditNoteFragment.newInstance(note))
-                    .commit();
+            val note: Note = intent?.getParcelableExtra(ARG_NOTE)?:Note()
+            supportFragmentManager
+                .beginTransaction() //                    .replace(R.id.container, NoteDetailsFragment.newInstance(note))
+                .replace(R.id.container, newInstance(note))
+                .commit()
         }
+    }
+
+    companion object {
+        const val ARG_NOTE = "ARG_NOTE"
     }
 }

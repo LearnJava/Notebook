@@ -1,143 +1,108 @@
-package ru.konstantin.notebook.ui.details;
+package ru.konstantin.notebook.ui.details
 
-import android.content.Context;
-import android.os.Bundle;
+import android.content.Context
+import androidx.fragment.app.FragmentActivity
+import ru.konstantin.notebook.repository.NoteRepository
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import android.os.Bundle
+import android.view.View
+import ru.konstantin.notebook.R
+import ru.konstantin.notebook.repository.NoteFirestoreRepositoryImpl
+import android.widget.EditText
+import android.widget.DatePicker
+import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
+import ru.konstantin.notebook.entity.Note
+import ru.konstantin.notebook.repository.Callback
+import java.util.*
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.DatePicker;
-import android.widget.EditText;
-
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-
-import ru.konstantin.notebook.R;
-import ru.konstantin.notebook.entity.Note;
-import ru.konstantin.notebook.repository.Callback;
-import ru.konstantin.notebook.repository.NoteFirestoreRepositoryImpl;
-import ru.konstantin.notebook.repository.NoteRepository;
-import ru.konstantin.notebook.ui.list.NoteListFragment;
-import ru.konstantin.notebook.ui.notes.NotesAdapter;
-
-public class EditNoteFragment extends Fragment {
-
-    public static final String TAG = "EditNoteFragment";
-    public static final String ARG_NOTE = "ARG_NOTE";
-    public static final String UPDATE_RESULT = "UPDATE_RESULT";
-    public static final String IS_UPDATE = "IS_UPDATE";
-
-    FragmentActivity myContext;
-    private NoteRepository noteRepository;
-
-    public static EditNoteFragment newInstance(Note note) {
-        EditNoteFragment fragment = new EditNoteFragment();
-        Bundle args = new Bundle();
-        args.putParcelable(ARG_NOTE, note);
-        fragment.setArguments(args);
-        return fragment;
+class EditNoteFragment : Fragment() {
+    var myContext: FragmentActivity? = null
+    private var noteRepository: NoteRepository? = null
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_edit_note, container, false)
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_edit_note, container, false);
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        myContext = context as FragmentActivity
+        noteRepository = NoteFirestoreRepositoryImpl()
     }
 
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        myContext = (FragmentActivity) context;
-        noteRepository = new NoteFirestoreRepositoryImpl();
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-
-        Note note = getArguments().getParcelable(ARG_NOTE);
-        EditText noteDesc = view.findViewById(R.id.description_edit);
-        EditText noteText = view.findViewById(R.id.note_text_edit);
-
-        DatePicker datePicker = view.findViewById(R.id.note_date_edit);
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(note.getNoteDate()));
-
-        datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH), new DatePicker.OnDateChangedListener() {
-            @Override
-            public void onDateChanged(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-
-            }
-        });
-
-        noteDesc.setText(note.getDescription());
-        noteText.setText(note.getNoteText());
-
-        Toolbar toolbar = view.findViewById(R.id.toolbar_apply);
-
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_apply) {
-
-                    Bundle bundle = new Bundle();
-
-                    Note note = getArguments().getParcelable(ARG_NOTE);
-                    note.setDescription(noteDesc.getText().toString());
-                    note.setNoteText(noteText.getText().toString());
-
-                    Calendar calendar = new GregorianCalendar(datePicker.getYear(), datePicker.getMonth(), datePicker.getDayOfMonth());
-                    note.setNoteDate(calendar.getTimeInMillis());
-
-                    if (note.getId() == null) {
-                        bundle.putBoolean(IS_UPDATE, false);
-                        noteRepository.add(note, new Callback<Note>() {
-
-                            @Override
-                            public void onSuccess(Note result) {
-                                bundle.putParcelable(ARG_NOTE, result);
-                                getParentFragmentManager().setFragmentResult(UPDATE_RESULT, bundle);
-                                // Общение между фрагментами (результат работы фрагмента)...
-                                myContext.getSupportFragmentManager().popBackStack();
-                            }
-                        });
-                    } else {
-                        //вместо метода update. Удаляем старую заметку и добавляем новую,
-                        // но так как сортируем мы по полю даты, то появится заметка в адаптере на том же месте
-                        bundle.putBoolean(IS_UPDATE, true);
-                        noteRepository.remove(note, new Callback<Note>() {
-                            @Override
-                            public void onSuccess(Note result) {
-
-                            }
-                        });
-
-                        noteRepository.add(note, new Callback<Note>() {
-                            @Override
-                            public void onSuccess(Note result) {
-                                bundle.putParcelable(ARG_NOTE, result);
-                                getParentFragmentManager().setFragmentResult(UPDATE_RESULT, bundle);
-                                // Общение между фрагментами (результат работы фрагмента)...
-
-                                myContext.getSupportFragmentManager().popBackStack();
-                            }
-                        });
-                    }
-                    return true;
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val note: Note = arguments?.getParcelable(ARG_NOTE) ?: Note()
+        val noteDesc = view.findViewById<EditText>(R.id.description_edit)
+        val noteText = view.findViewById<EditText>(R.id.note_text_edit)
+        val datePicker = view.findViewById<DatePicker>(R.id.note_date_edit)
+        val calendar = Calendar.getInstance()
+        calendar.time = Date(note.noteDate)
+        datePicker.init(
+            calendar[Calendar.YEAR],
+            calendar[Calendar.MONTH],
+            calendar[Calendar.DAY_OF_MONTH]
+        ) { view, year, monthOfYear, dayOfMonth -> }
+        noteDesc.setText(note.description)
+        noteText.setText(note.noteText)
+        val toolbar: Toolbar = view.findViewById(R.id.toolbar_apply)
+        toolbar.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_apply) {
+                val bundle = Bundle()
+//                val note: Note = arguments!!.getParcelable(ARG_NOTE)
+                note.description = noteDesc.text.toString()
+                note.noteText = noteText.text.toString()
+                val calendar: Calendar =
+                    GregorianCalendar(datePicker.year, datePicker.month, datePicker.dayOfMonth)
+                note.noteDate = calendar.timeInMillis
+                if (note.id == null) {
+                    bundle.putBoolean(IS_UPDATE, false)
+                    noteRepository!!.add(note, object : Callback<Note> {
+                        override fun onSuccess(result: Note) {
+                            bundle.putParcelable(ARG_NOTE, result)
+                            parentFragmentManager.setFragmentResult(UPDATE_RESULT, bundle)
+                            // Общение между фрагментами (результат работы фрагмента)...
+                            myContext!!.supportFragmentManager.popBackStack()
+                        }
+                    })
+                } else {
+                    //вместо метода update. Удаляем старую заметку и добавляем новую,
+                    // но так как сортируем мы по полю даты, то появится заметка в адаптере на том же месте
+                    bundle.putBoolean(IS_UPDATE, true)
+                    noteRepository!!.remove(note, object : Callback<Note> {
+                        override fun onSuccess(result: Note) {}
+                    })
+                    noteRepository!!.add(note, object : Callback<Note> {
+                        override fun onSuccess(result: Note) {
+                            bundle.putParcelable(ARG_NOTE, result)
+                            parentFragmentManager.setFragmentResult(UPDATE_RESULT, bundle)
+                            // Общение между фрагментами (результат работы фрагмента)...
+                            myContext!!.supportFragmentManager.popBackStack()
+                        }
+                    })
                 }
-                return false;
+                return@OnMenuItemClickListener true
             }
-        });
+            false
+        })
+    }
+
+    companion object {
+        const val TAG = "EditNoteFragment"
+        const val ARG_NOTE = "ARG_NOTE"
+        const val UPDATE_RESULT = "UPDATE_RESULT"
+        const val IS_UPDATE = "IS_UPDATE"
+
+        @JvmStatic
+        fun newInstance(note: Note?): EditNoteFragment {
+            val fragment = EditNoteFragment()
+            val args = Bundle()
+            args.putParcelable(ARG_NOTE, note)
+            fragment.arguments = args
+            return fragment
+        }
     }
 }

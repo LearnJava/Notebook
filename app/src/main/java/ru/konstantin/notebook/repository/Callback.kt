@@ -1,6 +1,5 @@
-package ru.konstantin.notebook.repository;
+package ru.konstantin.notebook.repository
 
-public interface Callback<T> {
-
-    void onSuccess(T result);
+interface Callback<T> {
+    fun onSuccess(result: T)
 }

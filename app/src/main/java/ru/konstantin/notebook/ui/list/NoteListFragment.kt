@@ -1,254 +1,189 @@
-package ru.konstantin.notebook.ui.list;
+package ru.konstantin.notebook.ui.list
 
-import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Bundle;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.content.Context
+import android.os.Bundle
+import android.view.*
+import android.view.ContextMenu.ContextMenuInfo
+import android.widget.ProgressBar
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.widget.Toolbar
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import ru.konstantin.notebook.R
+import ru.konstantin.notebook.entity.Note
+import ru.konstantin.notebook.repository.Callback
+import ru.konstantin.notebook.repository.NoteFirestoreRepositoryImpl
+import ru.konstantin.notebook.repository.NoteRepository
+import ru.konstantin.notebook.ui.details.EditNoteFragment
+import ru.konstantin.notebook.ui.details.EditNoteFragment.Companion.newInstance
+import ru.konstantin.notebook.ui.notes.NotesAdapter
+import ru.konstantin.notebook.ui.notes.NotesAdapter.OnNoteClickedListener
+import ru.konstantin.notebook.ui.notes.NotesAdapter.OnNoteLongClickedListener
+import java.util.*
 
-import android.widget.ProgressBar;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-
-import androidx.fragment.app.FragmentResultListener;
-
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import java.util.Collections;
-
-import java.util.Date;
-
-import java.util.List;
-
-import ru.konstantin.notebook.R;
-import ru.konstantin.notebook.entity.Note;
-import ru.konstantin.notebook.repository.Callback;
-import ru.konstantin.notebook.repository.NoteFirestoreRepositoryImpl;
-import ru.konstantin.notebook.repository.NoteRepository;
-import ru.konstantin.notebook.ui.details.EditNoteFragment;
-import ru.konstantin.notebook.ui.notes.NotesAdapter;
-
-public class NoteListFragment extends Fragment {
-
-    public interface OnNoteClicked {
-        void onNoteClicked(Note note);
+class NoteListFragment : Fragment() {
+    interface OnNoteClicked {
+        fun onNoteClicked(note: Note?)
     }
 
-    private boolean isLoading = false;
-
-    private ProgressBar progressBar;
-
-    FragmentActivity myContext;
-
-    private final NoteRepository noteRepository = new NoteFirestoreRepositoryImpl();
-    private OnNoteClicked onNoteClicked;
-    private NotesAdapter notesAdapter;
-
-    private int longClickedIndex;
-    private Note longClickedNote;
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        myContext = (FragmentActivity) context;
-        if (context instanceof OnNoteClicked) {
-            onNoteClicked = (OnNoteClicked) context;
+    private var isLoading = false
+    private val progressBar: ProgressBar? = null
+    var myContext: FragmentActivity? = null
+    private val noteRepository: NoteRepository = NoteFirestoreRepositoryImpl()
+    private var onNoteClicked: OnNoteClicked? = null
+    private var notesAdapter: NotesAdapter? = null
+    private var longClickedIndex = 0
+    private var longClickedNote: Note = Note()
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        myContext = context as FragmentActivity
+        if (context is OnNoteClicked) {
+            onNoteClicked = context
         }
     }
 
-    @Override
-    public void onDetach() {
-        super.onDetach();
-
-        onNoteClicked = null;
+    override fun onDetach() {
+        super.onDetach()
+        onNoteClicked = null
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        notesAdapter = new NotesAdapter(this);
-
-        notesAdapter.setLongClickedListener(new NotesAdapter.OnNoteLongClickedListener() {
-            @Override
-            public void onNoteLongClickedListener(@NonNull Note note, int index) {
-                longClickedIndex = index;
-                longClickedNote = note;
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        notesAdapter = NotesAdapter(this)
+        notesAdapter!!.longClickedListener = object : OnNoteLongClickedListener {
+            override fun onNoteLongClickedListener(note: Note, index: Int) {
+                longClickedIndex = index
+                longClickedNote = note
             }
-        });
+        }
 
         // Обмен между фрагментами...
-        getParentFragmentManager().setFragmentResultListener(EditNoteFragment.UPDATE_RESULT, this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+        parentFragmentManager.setFragmentResultListener(
+            EditNoteFragment.UPDATE_RESULT,
+            this,
+            { requestKey, result ->
                 if (!result.getBoolean(EditNoteFragment.IS_UPDATE)) {
-
-                    Note note = result.getParcelable(EditNoteFragment.ARG_NOTE);
-                    notesAdapter.notifyItemChanged(notesAdapter.add(note));
-                    notesAdapter.notifyDataSetChanged();
+                    val note: Note = result.getParcelable(EditNoteFragment.ARG_NOTE) ?:Note()
+                    notesAdapter!!.notifyItemChanged(notesAdapter!!.add(note))
+                    notesAdapter!!.notifyDataSetChanged()
                 } else if (result.getBoolean(EditNoteFragment.IS_UPDATE)) {
-
-                    Note note = result.getParcelable(EditNoteFragment.ARG_NOTE);
-                    notesAdapter.update(note);
-                    notesAdapter.notifyItemChanged(longClickedIndex);
-                    notesAdapter.notifyDataSetChanged();
+                    val note: Note = result.getParcelable(EditNoteFragment.ARG_NOTE) ?: Note()
+                    notesAdapter!!.update(note)
+                    notesAdapter!!.notifyItemChanged(longClickedIndex)
+                    notesAdapter!!.notifyDataSetChanged()
                 }
-            }
-        });
+            })
         // Обмен между фрагментами...
-
-        isLoading = true;
-
-        noteRepository.getNotes(new Callback<List<Note>>() {
-            @Override
-            public void onSuccess(List<Note> result) {
-                notesAdapter.setData(result);
-                notesAdapter.notifyDataSetChanged();
-
-                isLoading = false;
-
+        isLoading = true
+        noteRepository.getNotes(object : Callback<List<Note>> {
+            override fun onSuccess(result: List<Note>) {
+                notesAdapter!!.setData(result)
+                notesAdapter!!.notifyDataSetChanged()
+                isLoading = false
                 if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
+                    progressBar.visibility = View.GONE
                 }
             }
-        });
+        })
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_note_list, container, false);
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_note_list, container, false)
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        RecyclerView recyclerView = view.findViewById(R.id.notes_list);
-        recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
-
-        noteRepository.getNotes(new Callback<List<Note>>() {
-            @Override
-            public void onSuccess(List<Note> result) {
-                notesAdapter.setData(result);
-                notesAdapter.notifyDataSetChanged();
-
-                isLoading = false;
-
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val recyclerView: RecyclerView = view.findViewById(R.id.notes_list)
+        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+        noteRepository.getNotes(object : Callback<List<Note>> {
+            override fun onSuccess(result: List<Note>) {
+                notesAdapter!!.setData(result)
+                notesAdapter!!.notifyDataSetChanged()
+                isLoading = false
                 if (progressBar != null) {
-                    progressBar.setVisibility(View.GONE);
+                    progressBar.visibility = View.GONE
                 }
             }
-        });
-
-        Toolbar toolbar = view.findViewById(R.id.toolbar_2);
-
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.action_add) {
-                    Note note = new Note();
-                    note.setNoteDate(new Date().getTime());
-                    myContext.getSupportFragmentManager()
-                            .beginTransaction()
-                            .addToBackStack(EditNoteFragment.TAG)
-                            .add(R.id.container, EditNoteFragment.newInstance(note))
-                            .commit();
-                    return true;
-                }
-
-                if (item.getItemId() == R.id.action_clear) {
-                    noteRepository.clear();
-                    notesAdapter.setData(Collections.emptyList());
-                    notesAdapter.notifyDataSetChanged();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        recyclerView.setAdapter(notesAdapter);
-
-        notesAdapter.notifyDataSetChanged();
-
-        notesAdapter.setListener(note -> {
-            if (onNoteClicked != null) {
-                onNoteClicked.onNoteClicked(note);
-            }
-        });
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-    }
-
-    @Override
-    public void onCreateContextMenu(@NonNull ContextMenu menu, @NonNull View v, @Nullable ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        requireActivity().getMenuInflater().inflate(R.menu.notes_context, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-
-        if (item.getItemId() == R.id.action_edit) {
-
-            myContext.getSupportFragmentManager()
+        })
+        val toolbar: Toolbar = view.findViewById(R.id.toolbar_2)
+        toolbar.setOnMenuItemClickListener(Toolbar.OnMenuItemClickListener { item ->
+            if (item.itemId == R.id.action_add) {
+                val note = Note()
+                note.noteDate = Date().time
+                myContext!!.supportFragmentManager
                     .beginTransaction()
                     .addToBackStack(EditNoteFragment.TAG)
-                    .replace(R.id.container, EditNoteFragment.newInstance(longClickedNote))
-                    .commit();
-            return true;
-        }
-
-        if (item.getItemId() == R.id.action_delete) {
-            noteRepository.remove(longClickedNote, new Callback<Note>() {
-                @Override
-                public void onSuccess(Note result) {
-                    showAlertDeleteDialog();
-
+                    .add(R.id.container, newInstance(note))
+                    .commit()
+                return@OnMenuItemClickListener true
+            }
+            if (item.itemId == R.id.action_clear) {
+                noteRepository.clear()
+                notesAdapter!!.setData(emptyList())
+                notesAdapter!!.notifyDataSetChanged()
+                return@OnMenuItemClickListener true
+            }
+            false
+        })
+        recyclerView.adapter = notesAdapter
+        notesAdapter!!.notifyDataSetChanged()
+        notesAdapter!!.listener = object : OnNoteClickedListener {
+            override fun onNoteClickedListener(note: Note) {
+                if (onNoteClicked != null) {
+                    onNoteClicked!!.onNoteClicked(note)
                 }
-            });
-            return true;
+            }
         }
-
-        return super.onContextItemSelected(item);
-
     }
 
-    private void showAlertDeleteDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
-                .setTitle(R.string.delete_dialog)
-                .setMessage(R.string.delete_message)
-                .setPositiveButton(R.string.yes_delete, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        notesAdapter.remove(longClickedNote);
-                        notesAdapter.notifyItemRemoved(longClickedIndex);
-                    }
-                })
-                .setNegativeButton(R.string.not_delete, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-
-                    }
-                });
-
-        builder.show();
+    override fun onStart() {
+        super.onStart()
     }
 
+    override fun onStop() {
+        super.onStop()
+    }
 
+    override fun onCreateContextMenu(menu: ContextMenu, v: View, menuInfo: ContextMenuInfo?) {
+        super.onCreateContextMenu(menu, v, menuInfo)
+        requireActivity().menuInflater.inflate(R.menu.notes_context, menu)
+    }
+
+    override fun onContextItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == R.id.action_edit) {
+            myContext!!.supportFragmentManager
+                .beginTransaction()
+                .addToBackStack(EditNoteFragment.TAG)
+                .replace(R.id.container, newInstance(longClickedNote))
+                .commit()
+            return true
+        }
+        if (item.itemId == R.id.action_delete) {
+            noteRepository.remove(longClickedNote, object : Callback<Note> {
+                override fun onSuccess(result: Note) {
+                    showAlertDeleteDialog()
+                }
+            })
+            return true
+        }
+        return super.onContextItemSelected(item)
+    }
+
+    private fun showAlertDeleteDialog() {
+        val builder = AlertDialog.Builder(requireContext())
+            .setTitle(R.string.delete_dialog)
+            .setMessage(R.string.delete_message)
+            .setPositiveButton(R.string.yes_delete) { dialog, which ->
+                notesAdapter!!.remove(longClickedNote)
+                notesAdapter!!.notifyItemRemoved(longClickedIndex)
+            }
+            .setNegativeButton(R.string.not_delete) { dialog, which -> }
+        builder.show()
+    }
 }

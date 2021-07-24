@@ -17,7 +17,6 @@ import ru.konstantin.notebook.repository.Callback
 import ru.konstantin.notebook.repository.NoteFirestoreRepositoryImpl
 import ru.konstantin.notebook.repository.NoteRepository
 import ru.konstantin.notebook.ui.details.EditNoteFragment
-import ru.konstantin.notebook.ui.details.EditNoteFragment.Companion.newInstance
 import ru.konstantin.notebook.ui.notes.NotesAdapter
 import ru.konstantin.notebook.ui.notes.NotesAdapter.OnNoteClickedListener
 import ru.konstantin.notebook.ui.notes.NotesAdapter.OnNoteLongClickedListener
@@ -119,7 +118,7 @@ class NoteListFragment : Fragment() {
                 myContext!!.supportFragmentManager
                     .beginTransaction()
                     .addToBackStack(EditNoteFragment.TAG)
-                    .add(R.id.container, newInstance(note))
+                    .add(R.id.container, EditNoteFragment.newInstance(note))
                     .commit()
                 return@OnMenuItemClickListener true
             }
@@ -160,7 +159,7 @@ class NoteListFragment : Fragment() {
             myContext!!.supportFragmentManager
                 .beginTransaction()
                 .addToBackStack(EditNoteFragment.TAG)
-                .replace(R.id.container, newInstance(longClickedNote))
+                .replace(R.id.container, EditNoteFragment.newInstance(longClickedNote))
                 .commit()
             return true
         }

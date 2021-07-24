@@ -17,7 +17,21 @@ import ru.konstantin.notebook.entity.Note
 import ru.konstantin.notebook.repository.Callback
 import java.util.*
 
-class EditNoteFragment : Fragment() {
+object EditNoteFragment : Fragment() {
+
+    const val TAG = "EditNoteFragment"
+    const val ARG_NOTE = "ARG_NOTE"
+    const val UPDATE_RESULT = "UPDATE_RESULT"
+    const val IS_UPDATE = "IS_UPDATE"
+
+    fun newInstance(note: Note?): EditNoteFragment {
+        val fragment = EditNoteFragment
+        val args = Bundle()
+        args.putParcelable(ARG_NOTE, note)
+        fragment.arguments = args
+        return fragment
+    }
+
     var myContext: FragmentActivity? = null
     private var noteRepository: NoteRepository? = null
     override fun onCreateView(
@@ -88,21 +102,5 @@ class EditNoteFragment : Fragment() {
             }
             false
         })
-    }
-
-    companion object {
-        const val TAG = "EditNoteFragment"
-        const val ARG_NOTE = "ARG_NOTE"
-        const val UPDATE_RESULT = "UPDATE_RESULT"
-        const val IS_UPDATE = "IS_UPDATE"
-
-        @JvmStatic
-        fun newInstance(note: Note?): EditNoteFragment {
-            val fragment = EditNoteFragment()
-            val args = Bundle()
-            args.putParcelable(ARG_NOTE, note)
-            fragment.arguments = args
-            return fragment
-        }
     }
 }
